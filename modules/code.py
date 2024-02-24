@@ -307,3 +307,69 @@ def table_management(token: str, server_hostname: str, app_id: str, action: str)
 
     else:
         print(f"Wrong action input parameter. It can be 'create' or 'delete' and you used {action}")
+
+def catalog_management(token: str, server_hostname: str, app_id: str, catalog_name: str, action: str) -> None:
+    '''
+    Input parameters:
+    token: str
+    Authentication can be done with Databricks PAT (personal access token) or Microsoft Entra ID token.
+
+    server_hostname str:
+    Databricks server hostname in the next format:
+    https://adb-123456789.12.azuredatabricks.net'
+
+    app_id: str
+    Service Principal's Application ID. It can't be empty.
+
+    catalog_name: str
+    The main catalog which will be used for Ikidata's automation solution. 
+
+    action: str
+    It can be "create" or "delete".
+    '''
+  
+    assert app_id != '', "app_id can't be empty. Please populate with the correct application ID (not object ID)"
+    assert catalog_name != '', "catalog_name can't be empy. Please populate with the correct Catalog name."
+    
+    if action.lower() == 'create':
+
+        securable_type = 'catalog'
+        api_version = '/api/2.1'
+        api_command = f'/unity-catalog/permissions/{securable_type}/{catalog_name}'
+        url = f"{server_hostname}{api_version}{api_command}"
+        headers = {'Authorization': 'Bearer %s' % token}
+        session = requests.Session()
+        payload = {
+        "changes": [
+            {
+            "principal": app_id,
+            "add": [ 
+                "ALL_PRIVILEGES"
+            ]}]}
+
+        resp = session.request('PATCH', url, data=json.dumps(payload), verify = True, headers=headers) 
+        assert resp.status_code == 200, f"Granting ALL PRIVILEGES permission on {catalog_name} to Application ID {app_id} has failed. Reason: {resp.json()}"
+        print(f"Granting ALL PRIVILEGES permission on {catalog_name} to Application ID {app_id} has succeeded")
+
+    elif action.lower() == 'delete':
+
+        securable_type = 'catalog'
+        api_version = '/api/2.1'
+        api_command = f'/unity-catalog/permissions/{securable_type}/{catalog_name}'
+        url = f"{server_hostname}{api_version}{api_command}"
+        headers = {'Authorization': 'Bearer %s' % token}
+        session = requests.Session()
+        payload = {
+        "changes": [
+            {
+            "principal": app_id,
+            "remove": [ 
+                "ALL_PRIVILEGES"
+            ]}]}
+
+        resp = session.request('PATCH', url, data=json.dumps(payload), verify = True, headers=headers) 
+        assert resp.status_code == 200, f"Removing ALL PRIVILEGES permission on {catalog_name} to Application ID {app_id} has failed. Reason: {resp.json()}"
+        print(f"Removing ALL PRIVILEGES permission on {catalog_name} to Application ID {app_id} has succeeded")
+
+    else:
+        print(f"Wrong action input parameter. It can be 'create' or 'delete' and you used {action}")
