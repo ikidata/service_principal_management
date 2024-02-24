@@ -1,0 +1,7 @@
+# Databricks Cluster Information
+# DBR Version: 13.3 LTS
+
+# Python Dependencies
+
+json==2.0.9
+requests==2.28.1
