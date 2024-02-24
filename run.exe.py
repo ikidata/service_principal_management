@@ -32,3 +32,7 @@ table_management(token, server_hostname, app_id, 'create')
 table_management(token, server_hostname, app_id, 'delete')
 workspace_management(token, server_hostname, app_id, 'delete')
 service_principal_management(token, server_hostname, app_id, display_name, 'delete')
+
+# COMMAND ----------
+
+
