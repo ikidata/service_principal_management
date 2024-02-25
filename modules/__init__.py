@@ -1,1 +1,1 @@
-from .code import service_principal_management, workspace_management, table_management, catalog_management
+from .code import service_principal_management, workspace_management, table_management, catalog_management, key_vault_management
