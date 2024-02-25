@@ -49,8 +49,11 @@ def service_principal_management(token: str, server_hostname: str, app_id: str, 
 
         session = requests.Session()
         resp = session.request('POST', url, data=json.dumps(payload), verify = True, headers=headers) 
-        assert resp.status_code == 201, f"Adding Service Principal {display_name} with Application ID {app_id} has failed. Reason: {resp.status_code} {resp.json()}"
-        print(f"Adding Service Principal {display_name} with Application ID {app_id} has succeeded.")
+        assert (resp.status_code == 201) | (resp.status_code == 409), f"Adding Service Principal {display_name} with Application ID {app_id} has failed. Reason: {resp.status_code} {resp.json()}"
+        if resp.status_code == 409:
+            print(f"Service Principal {display_name} with Application ID {app_id} already exists.")
+        else:
+            print(f"Adding Service Principal {display_name} with Application ID {app_id} has succeeded.")
     
     elif action.lower() == 'delete':
         api_version = '/api/2.0'
