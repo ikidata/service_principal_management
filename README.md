@@ -20,11 +20,11 @@ python
 pip install git+https://github.com/ikidata/service_principal_management
 
 ## Prerequisites
-Databricks cluster DBR Version: 13.3 LTS and python libraries can be found from requirements.txt file. Requires working token (personal access token / Entra ID Token) which owner has workspace admin rights and manage permissions on Unity Catalog to be able to provide access rights to the Service Principal. Also, main catalog will be needed for Ikidata's automated solution.
+Databricks cluster DBR Version: 13.3 LTS and python libraries can be found from requirements.txt file. Requires working token (personal access token / Entra ID Token) which owner has workspace admin rights and manage permissions on Unity Catalog to be able to provide access rights to the Service Principal. Also, main catalog will be needed for Ikidata's automated solution and Key Vault where Service Principal secret, ID and Azure Tenant ID will be stored. Remember that the chosen Service Principal needs to have access to the Key Vault (ie. Key Vault Secrets Officer role).
 
 ## Usage
 
-Repository contains example run.exe notebook which has easy-to-use instructions. the 'Modules' library contains four classes which can be found down below:
+Repository contains example run.exe notebook which has easy-to-use instructions. the 'Modules' library contains five classes which can be found down below:
 
 | Class                        | Description                                               |      Actions        |
 |------------------------------|-----------------------------------------------------------|---------------------|
@@ -32,12 +32,13 @@ Repository contains example run.exe notebook which has easy-to-use instructions.
 | workspace_management         | Creating "/ikidata" master folder and granting permissions|    create/delete    |  
 | table_management             | Granting use and read permissions to the required tables  |    create/delete    |
 | catalog_management           | Granting all privileges permissions to the chosen catalog |    create/delete    |
+| key_vault_management         | Granting read permission on the chosen Key Vault scope    |    create/delete    |
 
 ## Examples
 
 ```python
 # Importing modules
-from modules import service_principal_management, workspace_management, table_management, catalog_management
+from modules import service_principal_management, workspace_management, table_management, catalog_management, key_vault_management
 
 app_id = '123456789'
 display_name = 'ikidata_test_sp'
@@ -50,10 +51,12 @@ service_principal_management(token, server_hostname, app_id, display_name, 'crea
 workspace_management(token, server_hostname, app_id, 'create')
 table_management(token, server_hostname, app_id, 'create')
 catalog_management(token, server_hostname, app_id, catalog_name, 'create')
+key_vault_management(token, server_hostname, app_id, scope_name, 'create')
 
 # Removing permissions
 table_management(token, server_hostname, app_id, 'delete')
 workspace_management(token, server_hostname, app_id, 'delete')
 service_principal_management(token, server_hostname, app_id, display_name, 'delete')
 catalog_management(token, server_hostname, app_id, catalog_name, 'delete')
+service_principal_management(token, server_hostname, app_id, display_name, 'delete')
 ```
