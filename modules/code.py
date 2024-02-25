@@ -376,3 +376,62 @@ def catalog_management(token: str, server_hostname: str, app_id: str, catalog_na
 
     else:
         print(f"Wrong action input parameter. It can be 'create' or 'delete' and you used {action}")
+
+def key_vault_management(token: str, server_hostname: str, app_id: str, scope_name: str, action: str) -> None:
+    '''
+    Input parameters:
+    token: str
+    Authentication can be done with Databricks PAT (personal access token) or Microsoft Entra ID token.
+
+    server_hostname str:
+    Databricks server hostname in the next format:
+    https://adb-123456789.12.azuredatabricks.net'
+
+    app_id: str
+    Service Principal's Application ID. It can't be empty.
+
+    scope_name: str
+    The scope name of the Key Vault in Databricks workspace. 
+
+    action: str
+    It can be "create" or "delete".
+    '''
+  
+    assert app_id != '', "app_id can't be empty. Please populate with the correct application ID (not object ID)"
+    assert scope_name != '', "scope_name can't be empy. Please populate with the correct Key Vault scope name"
+    
+    if action.lower() == 'create':
+
+        api_version = '/api/2.0'
+        api_command = '/secrets/acls/put'
+        url = f"{server_hostname}{api_version}{api_command}"
+        headers = {'Authorization': 'Bearer %s' % token}
+        session = requests.Session()
+        payload = {
+                    "scope": scope_name,
+                    "principal": app_id,
+                    "permission": "READ"
+                    }
+
+        resp = session.request('POST', url, data=json.dumps(payload), verify = True, headers=headers) 
+        assert resp.status_code == 200, f"Granting READ permission on scope {scope_name} to Application ID {app_id} has failed. Reason: {resp.json()}"
+        print(f"Granting READ permission on scope {scope_name} to Application ID {app_id} has succeeded")
+
+    elif action.lower() == 'delete':
+
+        api_version = '/api/2.0'
+        api_command = '/secrets/acls/delete'
+        url = f"{server_hostname}{api_version}{api_command}"
+        headers = {'Authorization': 'Bearer %s' % token}
+        session = requests.Session()
+        payload = {
+                   "scope": scope_name,
+                   "principal": app_id
+                    }
+
+        resp = session.request('POST', url, data=json.dumps(payload), verify = True, headers=headers) 
+        assert resp.status_code == 200, f"Removing READ permission on scope {scope_name} to Application ID {app_id} has failed. Reason: {resp.json()}"
+        print(f"Removing READ permission on scope {scope_name} to Application ID {app_id} has succeeded")
+
+    else:
+        print(f"Wrong action input parameter. It can be 'create' or 'delete' and you used {action}")
