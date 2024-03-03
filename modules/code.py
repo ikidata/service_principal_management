@@ -200,7 +200,7 @@ def table_management(token: str, server_hostname: str, app_id: str, action: str)
         assert resp.status_code == 200, f"Granting USE CATALOG permission on {catalog_name} to Application ID {app_id} has failed. Reason: {resp.json()}"
         print(f"Granting USE CATALOG permission on {catalog_name} to Application ID {app_id} has succeeded")
 
-        schema_list = ['system.access', 'system.billing']
+        schema_list = ['system.access', 'system.billing', 'system.compute']
         securable_type = 'schema'
 
         for schema_name in schema_list:
@@ -221,7 +221,7 @@ def table_management(token: str, server_hostname: str, app_id: str, action: str)
             print(f"Granting USE SCHEMA permission on {schema_name} to Application ID {app_id} has succeeded")
 
 
-        tables_list = ['system.access.audit', 'system.billing.list_prices', 'system.billing.usage']
+        tables_list = ['system.access.audit', 'system.billing.list_prices', 'system.billing.usage', 'system.compute.clusters']
         securable_type = 'table'
 
         for table_name in tables_list:
