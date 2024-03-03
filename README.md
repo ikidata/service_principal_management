@@ -20,7 +20,12 @@ python
 pip install git+https://github.com/ikidata/service_principal_management
 
 ## Prerequisites
-Databricks cluster DBR Version: 13.3 LTS and python libraries can be found from requirements.txt file. Requires working token (personal access token / Entra ID Token) which owner has workspace admin rights and manage permissions on Unity Catalog to be able to provide access rights to the Service Principal. Also, main catalog will be needed for Ikidata's automated solution and Key Vault where Service Principal secret, ID and Azure Tenant ID will be stored. Remember that the chosen Service Principal needs to have access to the Key Vault (ie. Key Vault Secrets Officer role).
+* Databricks cluster DBR Version: 13.3 LTS 
+* Required python libraries can be found from requirements.txt file. 
+* Requires working token (personal access token / Entra ID Token) which owner has workspace admin rights and manage permissions on Unity Catalog to be able to provide access rights to the Service Principal. 
+* Granting access to main catalog which will be used for Ikidata's automated solution.
+* Key Vault where Service Principal secret, ID and Azure Tenant ID will be stored. Remember that the chosen Service Principal needs to have access to the Key Vault (ie. Key Vault Secrets Officer role).
+* Service Principal requires admin rights to the workspace or otherwise it can't monitor everything. Remember to Service Principal manually to "admins" user group.
 
 ## Usage
 
