@@ -29,9 +29,9 @@ pip install git+https://github.com/ikidata/service_principal_management
 
 ## Usage
 
-Repository contains example run.exe notebook which has easy-to-use instructions. the 'Modules' library contains five classes which can be found down below:
+Repository contains example run.exe notebook which has easy-to-use instructions and automated unit testing. Parameters can be passed as an environmental variables. The notebook has one main class called 'AccessManagement' contains five modules, which are explained down below:
 
-| Class                        | Description                                               |      Actions        |
+| Module                       | Description                                               |      Actions        |
 |------------------------------|-----------------------------------------------------------|---------------------|
 | service_principal_management | Adding new Service Principal to Databricks workspace      |    create/delete    |
 | workspace_management         | Creating "/ikidata" master folder and granting permissions|    create/delete    |  
@@ -43,7 +43,7 @@ Repository contains example run.exe notebook which has easy-to-use instructions.
 
 ```python
 # Importing modules
-from modules import service_principal_management, workspace_management, table_management, catalog_management, key_vault_management
+from modules import AccessManagement, activate_logger, UnitTest
 
 app_id = '123456789'
 display_name = 'ikidata_test_sp'
@@ -51,17 +51,31 @@ catalog_name = 'ikidata_catalog'
 server_hostname = 'https://adb-123456789.1.azuredatabricks.net'
 token = dbutils.secrets.get(scope = 'scope', key = 'admin-PAT') 
 
-# Granting permissions
-service_principal_management(token, server_hostname, app_id, display_name, 'create')
-workspace_management(token, server_hostname, app_id, 'create')
-table_management(token, server_hostname, app_id, 'create')
-catalog_management(token, server_hostname, app_id, catalog_name, 'create')
-key_vault_management(token, server_hostname, app_id, scope_name, 'create')
+### Activating logger
+logger = activate_logger()
 
-# Removing permissions
-table_management(token, server_hostname, app_id, 'delete')
-workspace_management(token, server_hostname, app_id, 'delete')
-service_principal_management(token, server_hostname, app_id, display_name, 'delete')
-catalog_management(token, server_hostname, app_id, catalog_name, 'delete')
-service_principal_management(token, server_hostname, app_id, display_name, 'delete')
+### Calling unit tests
+test = UnitTest(app_id, display_name, catalog_name, scope_name, server_hostname, token, logger)
+test.validate_inputs()
+test.validate_azure_app_id()
+test.validate_catalog_name()
+test.validate_databricks_url()
+
+# Granding accesses
+action = 'create'
+create = AccessManagement(app_id, display_name, catalog_name, scope_name, server_hostname, token, action, logger)
+create.service_principal_management()
+create.workspace_management()
+create.table_management()
+create.catalog_management()
+create.key_vault_management()
+
+# Removing accesses
+action = 'delete'
+delete = AccessManagement(app_id, display_name, catalog_name, scope_name, server_hostname, token, action, logger)
+delete.service_principal_management()
+delete.workspace_management()
+delete.table_management()
+delete.catalog_management()
+delete.key_vault_management()
 ```
