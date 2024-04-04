@@ -10,33 +10,51 @@
 
 # COMMAND ----------
 
-# DBTITLE 1,Populate parameters
-app_id = ''
-display_name = ''
-catalog_name = ''
-scope_name = ''
-server_hostname = ''
-token = ''  # Using Azure Key Vault HIGHLY RECOMMENDED: dbutils.secrets.get(scope = '', key = '') 
+# DBTITLE 1,Importing modules and activating logger
+from modules import AccessManagement, activate_logger, UnitTest
+import os
 
 # COMMAND ----------
 
-# DBTITLE 1,Importing modules
-from modules import service_principal_management, workspace_management, table_management, catalog_management, key_vault_management
+# DBTITLE 1,Populate parameters
+app_id = os.getenv('app_id')  
+display_name = os.getenv('display_name')  
+catalog_name = os.getenv('catalog_name')  
+scope_name = os.getenv('scope_name')  
+server_hostname = os.getenv('server_hostname')  
+token = os.getenv('token')  
+
+# COMMAND ----------
+
+# DBTITLE 1,Validating input parameters
+### Activating logger
+logger = activate_logger()
+
+### Calling unit tests
+test = UnitTest(app_id, display_name, catalog_name, scope_name, server_hostname, token, logger)
+test.validate_inputs()
+test.validate_azure_app_id()
+test.validate_catalog_name()
+test.validate_databricks_url()
 
 # COMMAND ----------
 
 # DBTITLE 1,Granting mandatory access rights to the chosen Service Principal
-service_principal_management(token, server_hostname, app_id, display_name, 'create')
-workspace_management(token, server_hostname, app_id, 'create')
-table_management(token, server_hostname, app_id, 'create')
-catalog_management(token, server_hostname, app_id, catalog_name, 'create')
-key_vault_management(token, server_hostname, app_id, scope_name, 'create')
+action = 'create'
+create = AccessManagement(app_id, display_name, catalog_name, scope_name, server_hostname, token, action, logger)
+create.service_principal_management()
+create.workspace_management()
+create.table_management()
+create.catalog_management()
+create.key_vault_management()
 
 # COMMAND ----------
 
 # DBTITLE 1,Removing access rights from Service Principal
-key_vault_management(token, server_hostname, app_id, scope_name, 'delete')
-catalog_management(token, server_hostname, app_id, catalog_name, 'delete')
-table_management(token, server_hostname, app_id, 'delete')
-workspace_management(token, server_hostname, app_id, 'delete')
-service_principal_management(token, server_hostname, app_id, display_name, 'delete')
+action = 'delete'
+delete = AccessManagement(app_id, display_name, catalog_name, scope_name, server_hostname, token, action, logger)
+delete.service_principal_management()
+delete.workspace_management()
+delete.table_management()
+delete.catalog_management()
+delete.key_vault_management()
