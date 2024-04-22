@@ -61,7 +61,7 @@ test.validate_azure_app_id()
 test.validate_catalog_name()
 test.validate_databricks_url()
 
-# Granding accesses
+# Granting accesses
 action = 'create'
 create = AccessManagement(app_id, display_name, catalog_name, scope_name, server_hostname, token, action, logger)
 create.service_principal_management()
