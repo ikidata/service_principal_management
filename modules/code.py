@@ -1,9 +1,13 @@
 import json
 import requests
 import logging
+#from modules import activate_logger, UnitTest
+from modules.logger import activate_logger
+from modules.utils import UnitTest
+import pandas as pd
 
 class AccessManagement():
-    def __init__(self, app_id: str, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, action: str, logger: str = ''):
+    def __init__(self, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, action: str, app_id: str = '', logger: str = ''):
         self.app_id = app_id
         self.display_name = display_name
         self.catalog_name = catalog_name
@@ -11,51 +15,108 @@ class AccessManagement():
         self.server_hostname = server_hostname
         self.token = token
         self.action = action
-        self.logger = logger
+
+        ### Activating logger if it's not passed as a parameter
+        if logger != '':
+            self.logger = logger
+        else:
+            self.logger = activate_logger() 
+        
+        ### Running unit tests
+        self.run_tests()
+
+    
+    def run_tests(self) -> None:  
+            '''
+            Calling all unit tests
+            '''
+            self.test = UnitTest(self.app_id, self.display_name, self.catalog_name, self.scope_name, self.server_hostname, self.token, self.action, self.logger)
+            self.test.validate_inputs()
+            self.test.validate_action()
+            if self.app_id and self.app_id != '':  
+                self.test.validate_azure_app_id()
+            self.test.validate_catalog_name()
+            self.test.validate_databricks_url()
+            self.test.validating_existing_service_principals()
+            self.logger.info("All tests have been executed.")  
+    
+    def fetching_admin_group_id(self) -> str:
+        '''
+        The function fetches admin group ID for the chosen workspace.
+        '''
+        api_version = '/api/2.0'
+        api_command = '/preview/scim/v2/Groups'  
+        url = f"{self.server_hostname}{api_version}{api_command}"
+        headers = {'Authorization': 'Bearer %s' % self.token}
+
+        session = requests.Session()
+        resp = session.request('GET', url, verify = True, headers=headers) 
+        groups = resp.json().get('Resources', [])  
+        admin_group_id = None  
+        for group in groups:  
+            if group.get('displayName') == 'admins':  
+                admin_group_id = group.get('id')  
+                return admin_group_id 
+        if not admin_group_id:  
+            raise Exception('Admin group not found')  
+
         
     def service_principal_management(self) -> None:
         '''
         Input parameters:
         token: str
-        Authentication can be done with Databricks PAT (personal access token) or Microsoft Entra ID token.
+        Databricks Service Principal is used for authentication. After the Databrick Service Principal is created, secret needs to be created manually from Databricks UI.
 
         server_hostname str:
         Databricks server hostname in the next format:
         https://adb-123456789.12.azuredatabricks.net'
 
-        app_id: str
-        Service Principal's Application ID. It can't be empty.
-
         display_name: str
-        Display name for Service Principal in Databricks workspace. It can't be empty.
+        Display name for Databricks Service Principal in Databricks workspace. It can't be empty.
 
         action: str
         It can be "create" or "delete".
         '''
 
         if self.action.lower() == 'create':
+
+            ### Fetching Admin Group ID
+            admin_group_id = self.fetching_admin_group_id()
+
             api_version = '/api/2.0'
             api_command = '/preview/scim/v2/ServicePrincipals'
             url = f"{self.server_hostname}{api_version}{api_command}"
             headers = {'Authorization': 'Bearer %s' % self.token}
 
-            payload = {'displayName': self.display_name,              
-            'groups': [],
-            'entitlements': [{'value': 'workspace-access'},
-                {'value': 'databricks-sql-access'},
-                {'value': 'allow-cluster-create'}],
-            'applicationId': self.app_id, 
-            'active': True}
+            ### Using correct payload based in Service Principal type
+            if self.app_id is None or self.app_id == '':  
+                payload = {'displayName': self.display_name,              
+                'groups': [{'value': admin_group_id}],  # Adding to "admins" group 
+                'entitlements': [{'value': 'workspace-access'},
+                    {'value': 'databricks-sql-access'},
+                    {'value': 'allow-cluster-create'}],
+                'active': True}
+            else:
+                payload = {'displayName': self.display_name,              
+                'groups': [{'value': admin_group_id}],
+                'entitlements': [{'value': 'workspace-access'},
+                    {'value': 'databricks-sql-access'},
+                    {'value': 'allow-cluster-create'}],
+                'applicationId': self.app_id, 
+                'active': True}
+
 
             session = requests.Session()
             resp = session.request('POST', url, data=json.dumps(payload), verify = True, headers=headers) 
-            assert (resp.status_code == 201) | (resp.status_code == 409), f"Adding Service Principal {self.display_name} with Application ID {self.app_id} has failed. Reason: {resp.status_code} {resp.json()}"
+            assert (resp.status_code == 201) | (resp.status_code == 409), f"Creating Service Principal {self.display_name} has failed. Reason: {resp.status_code} {resp.json()}"
             if resp.status_code == 409:
-                self.logger.info(f"Service Principal {self.display_name} with Application ID {self.app_id} already exists.")
+                self.logger.info(f"Service Principal {self.display_name} already exists.")
             else:
-                self.logger.info(f"Adding Service Principal {self.display_name} with Application ID {self.app_id} has succeeded.")
+                self.logger.info(f"Creating Service Principal {self.display_name} has succeeded.")
+                self.app_id = resp.json()['applicationId']
     
         elif self.action.lower() == 'delete':
+            assert (self.app_id != None and self.app_id != ''), 'Service Principal App ID was empty. Please check it again.'
             api_version = '/api/2.0'
             api_command = '/preview/scim/v2/ServicePrincipals'
             url = f"{self.server_hostname}{api_version}{api_command}"
@@ -68,6 +129,7 @@ class AccessManagement():
                     sp_id = sp['id']
                     sp_display_name = sp['displayName']
                     break
+            
 
             api_command = f'/preview/scim/v2/ServicePrincipals/{sp_id}'
             url = f"{self.server_hostname}{api_version}{api_command}"
@@ -301,8 +363,8 @@ class AccessManagement():
                 assert resp.status_code == 200, f"Removing SELECT permission on {table_name} to Application ID {self.app_id} has failed. Reason: {resp.json()}"
                 self.logger.info(f"Removing USE SELECT permission on {table_name} to Application ID {self.app_id} has succeeded")
 
-            else:
-                self.logger.warning(f"Wrong action input parameter. It can be 'create' or 'delete' and you used {self.action}")
+        else:
+            self.logger.warning(f"Wrong action input parameter. It can be 'create' or 'delete' and you used {self.action}")
 
     def catalog_management(self) -> None:
         '''

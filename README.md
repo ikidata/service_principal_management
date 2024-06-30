@@ -3,7 +3,7 @@ This is a repository for automated permission management for service principals.
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-This Python project provides a simple and efficient way to import Azure Service Principals to Databricks workspace and grant mandatory permissions for Ikidata's automated solution.
+This Python project provides a simple and efficient way to create Databricks Service Principals to Databricks workspace and grant mandatory permissions for Ikidata's automated solution.
 
 ## Table of Contents
 
@@ -24,8 +24,8 @@ pip install git+https://github.com/ikidata/service_principal_management
 * Required python libraries can be found from requirements.txt file. 
 * Requires working token (personal access token / Entra ID Token) which owner has workspace admin rights and manage permissions on Unity Catalog to be able to provide access rights to the Service Principal. 
 * Granting access to main catalog which will be used for Ikidata's automated solution.
-* Key Vault where Service Principal secret, ID and Azure Tenant ID will be stored. Remember that the chosen Service Principal needs to have access to the Key Vault (ie. Key Vault Secrets Officer role).
-* Service Principal requires admin rights to the workspace or otherwise it can't monitor everything. Remember to Service Principal manually to "admins" user group.
+* Key Vault where Webhook destination url will be stored.
+* Service Principal requires admin rights to the workspace or otherwise it can't monitor everything - it will be added to the "admins" user group automatically.
 
 ## Usage
 
@@ -33,7 +33,7 @@ Repository contains example run.exe notebook which has easy-to-use instructions 
 
 | Module                       | Description                                               |      Actions        |
 |------------------------------|-----------------------------------------------------------|---------------------|
-| service_principal_management | Adding new Service Principal to Databricks workspace      |    create/delete    |
+| service_principal_management | Creating a new Service Principal to Databricks workspace  |    create/delete    |
 | workspace_management         | Creating "/ikidata" master folder and granting permissions|    create/delete    |  
 | table_management             | Granting use and read permissions to the required tables  |    create/delete    |
 | catalog_management           | Granting all privileges permissions to the chosen catalog |    create/delete    |
@@ -45,37 +45,27 @@ Repository contains example run.exe notebook which has easy-to-use instructions 
 # Importing modules
 from modules import AccessManagement, activate_logger, UnitTest
 
-app_id = '123456789'
+#app_id = '123456789'
 display_name = 'ikidata_test_sp'
 catalog_name = 'ikidata_catalog'
+scope_name = 'kv-customer'
 server_hostname = 'https://adb-123456789.1.azuredatabricks.net'
 token = dbutils.secrets.get(scope = 'scope', key = 'admin-PAT') 
-
-### Activating logger
-logger = activate_logger()
-
-### Calling unit tests
-test = UnitTest(app_id, display_name, catalog_name, scope_name, server_hostname, token, logger)
-test.validate_inputs()
-test.validate_azure_app_id()
-test.validate_catalog_name()
-test.validate_databricks_url()
-
-# Granting accesses
 action = 'create'
-create = AccessManagement(app_id, display_name, catalog_name, scope_name, server_hostname, token, action, logger)
-create.service_principal_management()
-create.workspace_management()
-create.table_management()
-create.catalog_management()
-create.key_vault_management()
 
-# Removing accesses
-action = 'delete'
-delete = AccessManagement(app_id, display_name, catalog_name, scope_name, server_hostname, token, action, logger)
-delete.service_principal_management()
-delete.workspace_management()
-delete.table_management()
-delete.catalog_management()
-delete.key_vault_management()
+main = AccessManagement(display_name = display_name, 
+                        catalog_name = catalog_name, 
+                        scope_name = scope_name, 
+                        server_hostname = server_hostname, 
+                        token = token, 
+                        action = action,
+                        app_id = '')  # when action = 'delete', app_id parameter is required
+
+
+#Granting / removing mandatory access rights to the chosen Service Principal
+main.service_principal_management()
+main.workspace_management()
+main.table_management()
+main.catalog_management()
+main.key_vault_management()
 ```
