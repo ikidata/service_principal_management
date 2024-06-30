@@ -43,7 +43,7 @@ Repository contains example run.exe notebook which has easy-to-use instructions 
 
 ```python
 # Importing modules
-from modules import AccessManagement, activate_logger, UnitTest
+from modules import AccessManagement
 
 #app_id = '123456789'
 display_name = 'ikidata_test_sp'
