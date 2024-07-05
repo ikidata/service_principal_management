@@ -76,7 +76,7 @@ The following catalog will be granted 'USE_CATALOG' access rights:
 * system
 
 The following schemas will be granted 'USE_SCHEMA' access rights:
-* system.access, system.billing, system.workflow
+* system.access, system.billing, system.compute, system.information_schema, system.workflow
 
 The following tables will be granted 'SELECT' access rights:
-* system.access.audit, system.billing.list_prices, system.billing.usage, system.workflow.jobs
+* system.access.audit, system.billing.list_prices, system.billing.usage, system.compute.clusters, system.information_schema.table_privileges, system.information_schema.schema_privileges, system.information_schema.catalog_privileges, system.information_schema.volume_privileges, system.workflow.jobs
