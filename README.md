@@ -69,3 +69,14 @@ main.table_management()
 main.catalog_management()
 main.key_vault_management()
 ```
+## Catalog, Schema & Table access rights
+The user will be granted 'ALL_PRIVILEGES' access rights to the selected catalog.
+
+The following catalog will be granted 'USE_CATALOG' access rights:
+* system
+
+The following schemas will be granted 'USE_SCHEMA' access rights:
+* system.access, system.billing, system.workflow
+
+The following tables will be granted 'SELECT' access rights:
+* system.access.audit, system.billing.list_prices, system.billing.usage, system.workflow.jobs
