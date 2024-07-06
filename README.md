@@ -51,13 +51,15 @@ catalog_name = 'ikidata_catalog'
 scope_name = 'kv-customer'
 server_hostname = 'https://adb-123456789.1.azuredatabricks.net'
 token = dbutils.secrets.get(scope = 'scope', key = 'admin-PAT') 
-action = 'create'
+sp_type = 'databricks' # 'azure'
+action = 'create' # 'delete'
 
 main = AccessManagement(display_name = display_name, 
                         catalog_name = catalog_name, 
                         scope_name = scope_name, 
                         server_hostname = server_hostname, 
                         token = token, 
+                        sp_type = sp_type,
                         action = action,
                         app_id = '')  # when action = 'delete', app_id parameter is required
 

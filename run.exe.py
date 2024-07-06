@@ -6,6 +6,7 @@
 # MAGIC * scope_name       ||   Name of the Key Vault scope Ikidata's automation solution will be using. Service Principal requires read access there.
 # MAGIC * server_hostname  ||   Databricks workspace hostname 'https://adb-1234556.1.azuredatabricks.net
 # MAGIC * token            ||   Can be PAT or Entra ID token as long as token owner has admin rights
+# MAGIC * sp_type          ||   The options can be 'azure' or 'databricks'.'azure' represents Azure Service Principal, and 'databricks' denotes Databricks service principal.
 # MAGIC * action           ||   Can be 'create' or 'delete' only. When 'delete' is used, app_id is required parameter.
 # MAGIC * app_id           ||   Azure Service Principal application ID. Optional parameter and on default not activated (using Databricks Service Principals is recommended). When deleting access rights & Service Principal, app_id parameter is required.
 
@@ -24,10 +25,11 @@ catalog_name = os.getenv('catalog_name')
 scope_name = os.getenv('scope_name')  
 server_hostname = os.getenv('server_hostname')  
 token = os.getenv('token')  
+sp_type = os.getenv('sp_type')  
 action = os.getenv('action')  ### Can be 'create' or 'delete' only
 
 ### Optional
-app_id = os.getenv('app_id')  ### Optional. If Entra ID Service Principal needs to be used instead of Databricks Service Principal, app id can be populated here. Otherwise leave it empty.
+app_id = os.getenv('app_id')  ### If 'azure' has been chosen for sp_type, app_id is required. It's also required when deleting sp/accesses, otherwise it's impossible to ensure that the correct service principal will be deleted.
 
 # COMMAND ----------
 
@@ -38,6 +40,7 @@ main = AccessManagement(display_name = display_name,
                         scope_name = scope_name, 
                         server_hostname = server_hostname, 
                         token = token, 
+                        sp_type = sp_type,
                         action = action,
                         app_id = '')  # when action = 'delete', app_id parameter is required
 

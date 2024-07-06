@@ -6,13 +6,14 @@ import requests
 import pandas as pd
 
 class UnitTest():
-    def __init__(self, app_id: str, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, action: str, logger: str = ''):
+    def __init__(self, app_id: str, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, sp_type: str, action: str, logger: str = ''):
         self.app_id = app_id
         self.display_name = display_name
         self.catalog_name = catalog_name
         self.scope_name = scope_name
         self.server_hostname = server_hostname
         self.token = token
+        self.sp_type = sp_type
         self.action = action
         
         ### Activating logger if it's not passed as a parameter
@@ -26,7 +27,7 @@ class UnitTest():
         Validates the input parameters to ensure each one is a non-empty string.   
         Raises ValueError if any input is not a string or if it is an empty string.  
         '''  
-        inputs = [self.display_name, self.catalog_name, self.scope_name, self.server_hostname, self.token]  
+        inputs = [self.display_name, self.catalog_name, self.scope_name, self.server_hostname, self.token, self.sp_type]  
     
         for input in inputs:  
             if not isinstance(input, str):  
@@ -36,6 +37,20 @@ class UnitTest():
         
         self.logger.info(f"Validate inputs unit test has been passed")
 
+    def validate_sp_type(self) -> None:  
+        '''  
+        Validates 'sp_type' input parameter. It can be 'create' or 'delete' only.
+        '''  
+        valid_sp_types = ['azure', 'databricks']  
+        if self.sp_type not in valid_sp_types:  
+            raise ValueError(f"Invalid sp_type: {self.sp_type}. Allowed values are 'azure' or 'databricks'.")  
+        
+        if self.sp_type == 'azure':
+            self.logger.info(f"Azure Service Principal was chosen")
+        else:
+            self.logger.info(f"Databricks Service Principal was chosen")
+        self.logger.info(f"Validate 'sp_type' input parameter unit test has been passed")
+    
     def validate_action(self) -> None:  
         '''  
         Validates 'action' input parameter. It can be 'create' or 'delete' only.
@@ -52,7 +67,6 @@ class UnitTest():
         Raises ValueError if the input is not a string or if it doesn't match the GUID format.  
         Azure AD application ID is a 32-character long GUID and Format: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX  
         '''
-        self.logger.info(f"Azure Service Principal was chosen instead of Databricks Service Principal")
 
         guid_regex = r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'  
     
