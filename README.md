@@ -81,4 +81,4 @@ The following schemas will be granted 'USE_SCHEMA' access rights:
 * system.access, system.billing, system.compute, system.information_schema, system.workflow
 
 The following tables will be granted 'SELECT' access rights:
-* system.access.audit, system.billing.list_prices, system.billing.usage, system.compute.clusters, system.information_schema.table_privileges, system.information_schema.schema_privileges, system.information_schema.catalog_privileges, system.information_schema.volume_privileges, system.workflow.jobs
+* system.access.audit, system.billing.list_prices, system.billing.usage, system.compute.clusters, system.information_schema.table_privileges, system.information_schema.schema_privileges, system.information_schema.catalog_privileges, system.information_schema.volume_privileges, system.information_schema.catalogs, system.information_schema.catalog_tags, system.information_schema.schemata, system.information_schema.schema_tags, system.information_schema.tables, system.information_schema.table_tags, system.workflow.jobs
