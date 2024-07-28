@@ -62,6 +62,7 @@ main = AccessManagement(display_name = display_name,
                         token = token, 
                         sp_type = sp_type,
                         action = action,
+                        cloud_provider = 'azure',
                         app_id = '')  # when action = 'delete', app_id parameter is required
 
 
