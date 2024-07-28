@@ -111,8 +111,7 @@ class UnitTest():
         '''  
         if self.cloud_provider == 'azure':
             url_regex = r'^https://adb-.*\.azuredatabricks\.net$'    
-        elif 
-            self.cloud_provider == 'aws':
+        elif self.cloud_provider == 'aws':
             url_regex = r'^https://dbc-\w+-\w+\.cloud\.databricks\.com$'  
         else:
             raise ValueError(f"'cloud_provider' can be 'azure' or 'aws' only and you used '{self.cloud_provider}'")
