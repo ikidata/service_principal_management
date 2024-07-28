@@ -8,6 +8,7 @@
 # MAGIC * token            ||   Can be PAT or Entra ID token as long as token owner has admin rights
 # MAGIC * sp_type          ||   The options can be 'azure' or 'databricks'.'azure' represents Azure Service Principal, and 'databricks' denotes Databricks service principal.
 # MAGIC * action           ||   Can be 'create' or 'delete' only. When 'delete' is used, app_id is required parameter.
+# MAGIC * cloud_provider   ||   Cloud provider. Can be 'azure' or 'aws' only.
 # MAGIC * app_id           ||   Azure Service Principal application ID. Optional parameter and on default not activated (using Databricks Service Principals is recommended). When deleting access rights & Service Principal, app_id parameter is required.
 
 # COMMAND ----------
@@ -27,6 +28,7 @@ server_hostname = os.getenv('server_hostname')
 token = os.getenv('token')  
 sp_type = os.getenv('sp_type')  
 action = os.getenv('action')  ### Can be 'create' or 'delete' only
+cloud_provider = os.getenv('cloud_provider')  ### Can be 'azure' or 'aws' only
 
 ### Optional
 app_id = os.getenv('app_id')  ### If 'azure' has been chosen for sp_type, app_id is required. It's also required when deleting sp/accesses, otherwise it's impossible to ensure that the correct service principal will be deleted.
@@ -42,6 +44,7 @@ main = AccessManagement(display_name = display_name,
                         token = token, 
                         sp_type = sp_type,
                         action = action,
+                        cloud_provider = cloud_provider
                         app_id = '')  # when action = 'delete', app_id parameter is required
 
 

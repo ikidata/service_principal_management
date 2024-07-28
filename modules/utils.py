@@ -6,7 +6,7 @@ import requests
 import pandas as pd
 
 class UnitTest():
-    def __init__(self, app_id: str, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, sp_type: str, action: str, logger: str = ''):
+    def __init__(self, app_id: str, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, sp_type: str, action: str, cloud_provider: str, logger: str = ''):
         self.app_id = app_id
         self.display_name = display_name
         self.catalog_name = catalog_name
@@ -15,6 +15,7 @@ class UnitTest():
         self.token = token
         self.sp_type = sp_type
         self.action = action
+        self.cloud_provider = cloud_provider
         
         ### Activating logger if it's not passed as a parameter
         if logger != '':
@@ -61,6 +62,16 @@ class UnitTest():
 
         self.logger.info(f"Validate 'action' input parameter unit test has been passed")
 
+    def validate_cloud_provider(self) -> None:  
+        '''  
+        Validates 'cloud_provider' input parameter. It can be 'azure' or 'aws' only.
+        '''  
+        valid_cloud_providers = ['azure', 'aws']  
+        if self.cloud_provider not in valid_cloud_providers:  
+            raise ValueError(f"Invalid action: {self.cloud_provider}. Allowed values are 'azure' or 'aws'.")  
+
+        self.logger.info(f"Validate 'cloud_provider' input parameter unit test has been passed")
+
     def validate_azure_app_id(self) -> None:  
         '''
         Validates the Azure AD application ID to ensure it is a non-empty string and matches the GUID format.  
@@ -98,8 +109,14 @@ class UnitTest():
         Validates the server_hostname input to ensure it starts with 'https://adb-' and ends with '.azuredatabricks.net'.  
         Raises ValueError if the server_hostname input is not a string or if it doesn't match the required format.  
         '''  
-        url_regex = r'^https://adb-.*\.azuredatabricks\.net$'    
-    
+        if self.cloud_provider == 'azure':
+            url_regex = r'^https://adb-.*\.azuredatabricks\.net$'    
+        elif 
+            self.cloud_provider == 'aws':
+            url_regex = r'^https://dbc-\w+-\w+\.cloud\.databricks\.com$'  
+        else:
+            raise ValueError(f"'cloud_provider' can be 'azure' or 'aws' only and you used '{self.cloud_provider}'")
+
         if not isinstance(self.server_hostname, str):    
             raise ValueError(f"Expected string but got {type(self.server_hostname).__name__}")    
         elif not re.fullmatch(url_regex, self.server_hostname):    
@@ -119,20 +136,25 @@ class UnitTest():
         session = requests.Session()
         resp = session.request('GET', url, verify = True, headers=headers) 
 
-        ### Validate results
-        df = pd.DataFrame(resp.json()['Resources'])
-
-        if self.action == 'create':
-            if len(df[df['displayName'] == self.display_name]) != 0:  
-                raise ValueError(f"Service Principal with name {self.display_name} already exists. Please choose another name.")  
-            else:
-                self.logger.info(f"Existing Service Principal unit test has been passed")
-        
-        elif self.action == 'delete':
-            if len(df[df['displayName'] == self.display_name]) == 0:  
-                raise ValueError(f"Service Principal with name {self.display_name} doesn't exist. Please check your Display Name.")  
-            else:
-                self.logger.info(f"Existing Service Principal unit test has been passed")
-
+        ### Checking if there are any service principals
+        if resp.json()['itemsPerPage'] == 0:
+            print("There aren't any existing service principals")
+            return None
         else:
-            raise ValueError(f"Wrong 'action' parameter: {self.action}")
+            ### Validate results
+            df = pd.DataFrame(resp.json()['Resources'])
+
+            if self.action == 'create':
+                if len(df[df['displayName'] == self.display_name]) != 0:  
+                    raise ValueError(f"Service Principal with name {self.display_name} already exists. Please choose another name.")  
+                else:
+                    self.logger.info(f"Existing Service Principal unit test has been passed")
+            
+            elif self.action == 'delete':
+                if len(df[df['displayName'] == self.display_name]) == 0:  
+                    raise ValueError(f"Service Principal with name {self.display_name} doesn't exist. Please check your Display Name.")  
+                else:
+                    self.logger.info(f"Existing Service Principal unit test has been passed")
+
+            else:
+                raise ValueError(f"Wrong 'action' parameter: {self.action}")

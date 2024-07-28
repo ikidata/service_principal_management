@@ -14,15 +14,15 @@ This Python project provides a simple and efficient way to create Databricks Ser
 
 ## Installation
 
-To use this Python project, you need to have Python installed on your system. Simply clone this repository and import all classes from `module` into your Python project.
+It is recommended to clone the repository to the Databricks environment and run it there. However, it is also possible to run the project outside of Databricks. To use this Python project, ensure that Python is installed on your system. Simply clone the repository and import all classes from the module into your Python project.
 
 python
 pip install git+https://github.com/ikidata/service_principal_management
 
 ## Prerequisites
-* Databricks cluster DBR Version: 13.3 LTS 
+* Databricks cluster DBR Version: 13.3 LTS or newer
 * Required python libraries can be found from requirements.txt file. 
-* Requires working token (personal access token / Entra ID Token) which owner has workspace admin rights and manage permissions on Unity Catalog to be able to provide access rights to the Service Principal. 
+* Requires working token (personal access token / Entra ID Token) which owner has workspace admin rights and Admin rights in Unity Catalog to be able to provide access rights to the Service Principal. 
 * Granting access to main catalog which will be used for Ikidata's automated solution.
 * Key Vault where Webhook destination url will be stored.
 * Service Principal requires admin rights to the workspace or otherwise it can't monitor everything - it will be added to the "admins" user group automatically.
@@ -51,8 +51,9 @@ catalog_name = 'ikidata_catalog'
 scope_name = 'kv-customer'
 server_hostname = 'https://adb-123456789.1.azuredatabricks.net'
 token = dbutils.secrets.get(scope = 'scope', key = 'admin-PAT') 
-sp_type = 'databricks' # 'azure'
-action = 'create' # 'delete'
+sp_type = 'databricks' # azure / databricks
+action = 'create' # create / delete
+cloud_provider = 'azure' # 'azure / aws
 
 main = AccessManagement(display_name = display_name, 
                         catalog_name = catalog_name, 

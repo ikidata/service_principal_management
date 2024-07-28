@@ -7,7 +7,7 @@ from modules.utils import UnitTest
 import pandas as pd
 
 class AccessManagement():
-    def __init__(self, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, sp_type: str, action: str, app_id: str = '', logger: str = ''):
+    def __init__(self, display_name: str, catalog_name: str, scope_name: str, server_hostname: str, token: str, sp_type: str, action: str, cloud_provider: str, app_id: str = '', logger: str = ''):
         self.app_id = app_id
         self.display_name = display_name
         self.catalog_name = catalog_name
@@ -16,6 +16,7 @@ class AccessManagement():
         self.token = token
         self.sp_type = sp_type
         self.action = action
+        self.cloud_provider = cloud_provider
 
         ### Activating logger if it's not passed as a parameter
         if logger != '':
@@ -31,10 +32,11 @@ class AccessManagement():
             '''
             Calling all unit tests
             '''
-            self.test = UnitTest(self.app_id, self.display_name, self.catalog_name, self.scope_name, self.server_hostname, self.token, self.sp_type, self.action, self.logger)
+            self.test = UnitTest(self.app_id, self.display_name, self.catalog_name, self.scope_name, self.server_hostname, self.token, self.sp_type, self.action, self.cloud_provider, self.logger)
             self.test.validate_inputs()
             self.test.validate_sp_type()
             self.test.validate_action()
+            self.test.validate_cloud_provider()
             if self.sp_type == 'entra':  
                 self.test.validate_azure_app_id()
             self.test.validate_catalog_name()
