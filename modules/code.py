@@ -260,7 +260,7 @@ class AccessManagement():
             assert resp.status_code == 200, f"Granting USE CATALOG permission on {catalog_name} to Application ID {self.app_id} has failed. Reason: {resp.json()}"
             self.logger.info(f"Granting USE CATALOG permission on {catalog_name} to Application ID {self.app_id} has succeeded")
 
-            schema_list = ['system.access', 'system.billing', 'system.compute', 'system.information_schema', 'system.workflow']
+            schema_list = ['system.access', 'system.billing', 'system.compute', 'system.information_schema', 'system.lakeflow']
             securable_type = 'schema'
 
             for schema_name in schema_list:
@@ -280,7 +280,7 @@ class AccessManagement():
                 assert resp.status_code == 200, f"Granting USE SCHEMA permission on {schema_name} to Application ID {self.app_id} has failed. Reason: {resp.json()}"
                 self.logger.info(f"Granting USE SCHEMA permission on {schema_name} to Application ID {self.app_id} has succeeded")
 
-            tables_list = ['system.access.audit', 'system.billing.list_prices', 'system.billing.usage', 'system.compute.clusters', 'system.information_schema.table_privileges', 'system.information_schema.schema_privileges', 'system.information_schema.catalog_privileges', 'system.information_schema.volume_privileges', 'system.information_schema.catalogs', 'system.information_schema.catalog_tags', 'system.information_schema.schemata', 'system.information_schema.schema_tags', 'system.information_schema.tables', 'system.information_schema.table_tags', 'system.workflow.jobs']
+            tables_list = ['system.access.audit', 'system.billing.list_prices', 'system.billing.usage', 'system.compute.clusters', 'system.information_schema.table_privileges', 'system.information_schema.schema_privileges', 'system.information_schema.catalog_privileges', 'system.information_schema.volume_privileges', 'system.information_schema.catalogs', 'system.information_schema.catalog_tags', 'system.information_schema.schemata', 'system.information_schema.schema_tags', 'system.information_schema.tables', 'system.information_schema.table_tags', 'system.lakeflow.jobs']
             securable_type = 'table'
 
             for table_name in tables_list:
@@ -324,7 +324,7 @@ class AccessManagement():
             assert resp.status_code == 200, f"Removing USE CATALOG permission on {catalog_name} to Application ID {self.app_id} has failed. Reason: {resp.json()}"
             self.logger.info(f"Removing USE CATALOG permission on {catalog_name} to Application ID {self.app_id} has succeeded")
 
-            schema_list = ['system.access', 'system.billing', 'system.information_schema', 'system.workflow']
+            schema_list = ['system.access', 'system.billing', 'system.information_schema', 'system.lakeflow']
             securable_type = 'schema'
 
             for schema_name in schema_list:
@@ -345,7 +345,7 @@ class AccessManagement():
                 self.logger.info(f"Removing USE SCHEMA permission on {schema_name} to Application ID {self.app_id} has succeeded")
 
 
-            tables_list = ['system.access.audit', 'system.billing.list_prices', 'system.billing.usage', 'system.information_schema.table_privileges', 'system.information_schema.schema_privileges', 'system.information_schema.catalog_privileges', 'system.information_schema.volume_privileges', 'system.information_schema.catalogs', 'system.information_schema.catalog_tags', 'system.information_schema.schemata', 'system.information_schema.schema_tags', 'system.information_schema.tables', 'system.information_schema.table_tags', 'system.workflow.jobs']
+            tables_list = ['system.access.audit', 'system.billing.list_prices', 'system.billing.usage', 'system.information_schema.table_privileges', 'system.information_schema.schema_privileges', 'system.information_schema.catalog_privileges', 'system.information_schema.volume_privileges', 'system.information_schema.catalogs', 'system.information_schema.catalog_tags', 'system.information_schema.schemata', 'system.information_schema.schema_tags', 'system.information_schema.tables', 'system.information_schema.table_tags', 'system.lakeflow.jobs']
             securable_type = 'table'
 
             for table_name in tables_list:
